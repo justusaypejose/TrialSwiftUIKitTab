@@ -13,6 +13,8 @@ class MenuListTableViewCell: UITableViewCell {
 
 class MenuListViewController: UIViewController, UITableViewDataSource {
 
+    @IBOutlet weak var refreshButton: UIBarButtonItem!
+    
     private let myTableView: UITableView = {
         let tableView = UITableView()
         tableView.register(MenuListTableViewCell.self, forCellReuseIdentifier: "MenuListTableViewCell")
@@ -24,22 +26,23 @@ class MenuListViewController: UIViewController, UITableViewDataSource {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
+        self.title = "Menu List"
+
         self.view .addSubview(self.myTableView)
         self.myTableView.frame = self.view.bounds
         self.myTableView.dataSource = self
         
-        Task.init {
-            do {
-                self.listOfItems = try await APIManager.shared.fetchDataAsyncAwait()
-                DispatchQueue.main.async {
-                    self.myTableView.reloadData()
-                }
-            } catch(let exception) {
-                print("Exception \(exception)")
-            }
-        }
+        self.loadData()
+        
     }
 
+    @IBAction func refreshButtonTapped(_ sender: Any) {
+        
+        self.listOfItems = ["Tennis", "Golf", "Basketball"]
+        self.myTableView.reloadData()
+        self.loadData()
+
+    }
     func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -58,5 +61,17 @@ class MenuListViewController: UIViewController, UITableViewDataSource {
         return "Async Await example"
     }
 
+    private func loadData() {
+        Task.init {
+            do {
+                self.listOfItems = try await APIManager.shared.fetchDataAsyncAwait()
+                DispatchQueue.main.async {
+                    self.myTableView.reloadData()
+                }
+            } catch(let exception) {
+                print("Exception \(exception)")
+            }
+        }
+    }
 }
 

@@ -17,6 +17,7 @@ class NetworkListViewController: UIViewController, UITableViewDataSource {
     
     private var listOfItems: [String] = ["Bell", "Rogers"]
     private var observer: AnyCancellable?
+    @IBOutlet weak var refreshButton: UIBarButtonItem!
     
     private var myTableView: UITableView = {
         let table = UITableView()
@@ -27,28 +28,18 @@ class NetworkListViewController: UIViewController, UITableViewDataSource {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        self.title = "Networks List"
         self.view .addSubview(myTableView)
         myTableView.frame = self.view.bounds
         myTableView.dataSource = self
         
+        self.loadData()
+    }
+    @IBAction func refreshButtonTapped(_ sender: Any) {
         
-        observer = APIManager.shared.fetchDataCombine()
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
-                switch (completion) {
-                case .finished:
-                    print("finished")
-                case .failure(let error):
-                    print(error)
-                }
-                
-            }, receiveValue: { [weak self] values in
-                if values.count > 0 {
-                    self?.listOfItems = values
-                    self?.myTableView.reloadData()
-                }
-            })
-        
+        self.listOfItems = ["Bell", "Rogers"]
+        self.myTableView.reloadData()
+        self.loadData()
     }
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -73,5 +64,24 @@ class NetworkListViewController: UIViewController, UITableViewDataSource {
         
     }
     
+    
+    private func loadData() {
+        observer = APIManager.shared.fetchDataCombine()
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                switch (completion) {
+                case .finished:
+                    print("finished")
+                case .failure(let error):
+                    print(error)
+                }
+                
+            }, receiveValue: { [weak self] values in
+                if values.count > 0 {
+                    self?.listOfItems = values
+                    self?.myTableView.reloadData()
+                }
+            })
+    }
 }
 

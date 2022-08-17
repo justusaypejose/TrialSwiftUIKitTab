@@ -14,6 +14,7 @@ class FavoritesTableViewCell: UITableViewCell {
 
 class FavoritesViewController: UIViewController, UITableViewDataSource {
 
+    @IBOutlet weak var refreshButton: UIBarButtonItem!
     private var listOfItems: [String] = ["12","wer"]
     
     private let tableView: UITableView = {
@@ -21,22 +22,20 @@ class FavoritesViewController: UIViewController, UITableViewDataSource {
         myTableView.register(FavoritesTableViewCell.self, forCellReuseIdentifier: "FavoritesTableViewCell")
         return myTableView
     }()
-    
+   
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view .addSubview(self.tableView)
         self.tableView.dataSource = self
         self.tableView.frame = self.view.bounds
         
-        APIManager.shared.fetchData { values in
-            if values.count > 0 {
-                self.listOfItems = values
-                
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            }
-        }
+        self.loadData()
+    }
+    
+    @IBAction func refreshButtonTapped(_ sender: Any) {
+        self.listOfItems = ["12","wer"]
+        self.tableView.reloadData()
+        self.loadData()
     }
     
     // MARK: - Table view Data source
@@ -58,6 +57,21 @@ class FavoritesViewController: UIViewController, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         return "Completion Handler Working"
+    }
+    
+    
+    private func loadData() {
+        
+        APIManager.shared.fetchData { values in
+            if values.count > 0 {
+                self.listOfItems = values
+                
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+            }
+        }
+        
     }
     
 }
